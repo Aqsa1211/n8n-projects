@@ -1,0 +1,391 @@
+{
+  "name": "[Sub-Workflow] Get Customer Shopify Order Data",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "email"
+            },
+            {
+              "name": "orderName"
+            },
+            {
+              "name": "description"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        32
+      ],
+      "id": "646bb031-a5e1-40ee-a7ee-d241a7eafdf8",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d80a82ac-71a0-4119-b7ee-96916b9af546",
+              "name": "data.email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "aa8a5b8e-5198-4407-b91f-7fc38adc7c24",
+              "name": "data.orderName",
+              "value": "={{ $json.orderName }}",
+              "type": "string"
+            },
+            {
+              "id": "9a32df27-3546-44f8-a3ef-f9d107196c5b",
+              "name": "data.description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        48,
+        32
+      ],
+      "id": "bc1a780c-a784-44ea-b1e1-3e9caf6891d5",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c6400efa-7271-40a0-a58a-c356c44980d5",
+              "leftValue": "={{ $json.data.orderName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        256,
+        32
+      ],
+      "id": "a6b76194-1891-40fe-996a-ac9d7e165304",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dfeabff2-7d29-45e4-95fd-95bcc625ae5d",
+              "name": "data.email",
+              "value": "={{ $json.data.email }}",
+              "type": "string"
+            },
+            {
+              "id": "e67cc53c-a1c5-4ad1-9716-cafb629c0053",
+              "name": "data.description",
+              "value": "={{ $json.data.description }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        128
+      ],
+      "id": "bc5caccb-9cbe-4848-811a-120f3bfbfa33",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}",
+        "options": {
+          "systemMessage": "=You are a helpful assistant. Today is {{ $now }}\n\nYou are a child AI agent and will recieve information from a parent agent. The parent will be sending you information from a customer support email for the ecommerce store My Store, which sells electronic items.\n\nYou will look through the information to determine customer email and customer order name and return the information so you can look up the order details using the Shopify tools.\n\nTools:\n\n1. \"Get Shopify Order Data by Order Name\": This tool retrieves order details directly from an order name. If an order name is found, use this tool to retrieve the order data. If an order name is not found, first check the customer's Shopify data using \"Get Shopify Customer Data by Email\" tool.\n\nWhen searching for orders, use \"Get Shopify Order Data by Order Name\" as an initial attempt. If no orders are found, then proceed to check for orders with the \"Get Shopify Order Data by customer id\" tool.\n\nIf a Shopify order is found, verify if the returned order is indeed from the customer. If it is, then retur the JSON as recieved from the \"Get Shopify Order Data by Order Name\" tool, including the following information: id, email, name, line_items, total_price, total_discounts, shipping_lines, tip_lines, customer, shipping_address, fulfillment_status, and fulfillments.\n\n2. \"Get Shopify Customer Data by Email\": This tool retrieves customer data, such as last order name, that can be used as an input to the \"Get Shopify Order Data by Order Name\" tool. The email shall have the format \"\"name@domain.com\", without any additional information. For example, a format like this \"first last <firstlast@domain.com>\" will be invalid and instead should simply be \"firstlast@domain.com\".\n\nif no orders are found, then proceed to check for orders with the \"Get Shopify Order Data by customer id\" tool.\n\n3. \"Get Shopify Order Data by customer id\": This tool is similar to the \"Get Shopify Order Data by Order Name\" tool in that it retrieves order details. However, it searches based on the customer email. This shuould be the backup attempt and may return multiple orders. Return the details for the latest orders only.\n\nIf no Shopify order name is found either from the input contents or from the Shopify customer data, then return \"No orders found for name@domain.com\", where you replace name@domain.com with the actual customer's email."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        704,
+        16
+      ],
+      "id": "31db0ac7-05b7-4638-a265-993595e849d4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "url": "https://mvbtsk-jx.myshopify.com/admin/api/2026-01/orders.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "shopifyOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "=status",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "=name",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', ``, 'string') }}"
+            },
+            {
+              "name": "fields",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1104,
+        128
+      ],
+      "id": "342411c8-3be9-43c4-a0e0-8c56504df5e0",
+      "name": "Get Shopify Order Data by Order Name",
+      "credentials": {
+        "shopifyOAuth2Api": {
+          "id": "Ea9X5W3wuumC1qDL",
+          "name": "Shopify Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://mvbtsk-jx.myshopify.com/admin/api/2026-01/customers/search.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "shopifyOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1056,
+        320
+      ],
+      "id": "c0183534-3a23-4795-bdbf-4df26f65ac01",
+      "name": "Get Customer Data By Email",
+      "credentials": {
+        "shopifyOAuth2Api": {
+          "id": "Ea9X5W3wuumC1qDL",
+          "name": "Shopify Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://mvbtsk-jx.myshopify.com/admin/api/2026-01/orders.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "shopifyOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "status",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "customer_id",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', ``, 'string') }}"
+            },
+            {
+              "name": "fields",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        864,
+        240
+      ],
+      "id": "9af1cc01-7b61-490a-8655-1ad756066acc",
+      "name": "Get Shopify Order Data by customer id",
+      "credentials": {
+        "shopifyOAuth2Api": {
+          "id": "Ea9X5W3wuumC1qDL",
+          "name": "Shopify Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        704,
+        192
+      ],
+      "id": "fccb2c6d-d8cd-4bb1-a3b3-6543237c4375",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "G3ojtP05E441CQfz",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Shopify Order Data by Order Name": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customer Data By Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Shopify Order Data by customer id": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "84ccbac0-490e-4d0f-8869-d7a33d970d2e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "98f0e1460d79cb8c3fc0d495c229aebc77446f0efb36cdd28bc583591a2e502a"
+  },
+  "id": "OHBcFAkTHH3tpYWJ",
+  "tags": []
+}
