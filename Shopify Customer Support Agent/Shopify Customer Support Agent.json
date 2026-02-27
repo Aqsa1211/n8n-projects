@@ -1,0 +1,1305 @@
+{
+  "name": "Musabela Shopify Customer Support - Final",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1_i52f9GLLWKFKpo9FH6QJ6Ed6nnar94o",
+          "mode": "list",
+          "cachedResultName": "Terms of Service.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1_i52f9GLLWKFKpo9FH6QJ6Ed6nnar94o/view?usp=drivesdk"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        4480,
+        1088
+      ],
+      "id": "73f76ff0-55dd-4072-b33a-0608e6a47756",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "KFOSq63cLTQJ2PoM",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        4784,
+        1312
+      ],
+      "id": "fdd2f040-adfb-41e6-98f1-5930426c80d5",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        4784,
+        1520
+      ],
+      "id": "d2c8d18c-217f-4ead-b384-87fe329f1ae3",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "url": "https://musabela-usa.myshopify.com/admin/api/2026-01/products.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "shopifyOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "250"
+            },
+            {
+              "name": "fields",
+              "value": "id,handle"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5280,
+        1104
+      ],
+      "id": "746d3752-5491-4b9c-8450-44142008a566",
+      "name": "HTTP Request",
+      "credentials": {
+        "shopifyOAuth2Api": {
+          "id": "4ujrTzPqFC3xapWF",
+          "name": "Shopify Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allProducts = items[0].json.products;\n\nreturn allProducts.map(product=> {\n  return {\n    json: {\n      \"ID\":product.id,\n      \"Handle\":product.handle\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5504,
+        1104
+      ],
+      "id": "e10efae9-f093-4177-979d-93debe0e6b06",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1bkEjg0SHPDYZj3txEmH0LRLGbjyZ9kaien7WoKZhI8o",
+          "mode": "list",
+          "cachedResultName": "products_export_1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bkEjg0SHPDYZj3txEmH0LRLGbjyZ9kaien7WoKZhI8o/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1630810781,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bkEjg0SHPDYZj3txEmH0LRLGbjyZ9kaien7WoKZhI8o/edit#gid=1630810781"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $json.ID }}",
+            "Handle": "={{ $json.Handle }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Handle",
+              "displayName": "Handle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        5728,
+        1104
+      ],
+      "id": "419814bb-a629-4cfc-9170-49f203207b88",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HuqRXN3VIf4lehp8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        4624,
+        1312
+      ],
+      "id": "a6798c30-2363-4893-ab88-ab6bd412ffbf",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "OvEyWchPL6ZDFbBd",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Vector Store Storage",
+        "height": 704,
+        "width": 784,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4368,
+        976
+      ],
+      "typeVersion": 1,
+      "id": "f7e91b15-d6d6-4614-98b9-c629cec60a93",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Creating Product Info CSV (Mapping ID to Handle)",
+        "height": 384,
+        "width": 736,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5200,
+        976
+      ],
+      "typeVersion": 1,
+      "id": "864c4581-086d-4347-89f0-47bf3105ddf8",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        4416,
+        192
+      ],
+      "id": "74583b4b-dd09-421d-a868-7a4fa77f6f76",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        6480,
+        384
+      ],
+      "id": "0f7ca5e9-8edd-444f-a7f9-62306eb3cbd7",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "OvEyWchPL6ZDFbBd",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        6896,
+        608
+      ],
+      "id": "90a774bf-f682-4e49-b17f-d5bce4eb0e75",
+      "name": "Embeddings OpenAI2",
+      "credentials": {
+        "openAiApi": {
+          "id": "OvEyWchPL6ZDFbBd",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Shopify Customer Support Workflow",
+        "height": 1088,
+        "width": 3664
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4368,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "48b3e3d5-9c03-4873-a5b0-d8c73b17fbcf",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "url": "https://musabela-usa.reamaze.io/api/v1/conversations?status=open&filter=needs_reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4608,
+        192
+      ],
+      "id": "f83269ec-a561-46e4-b5c1-832cdcd1ff84",
+      "name": "Get Conversations",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "hKE4jeIvYBRlbiB5",
+          "name": "Musabela Reamaze"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n\n  let message = item.json.message || \"\";\n\n  message = message.replace(/<style[\\s\\S]*?<\\/style>/gi, \"\");\n  message = message.replace(/<script[\\s\\S]*?<\\/script>/gi, \"\");\n  message = message.replace(/<!--[\\s\\S]*?-->/g, \"\");\n\n  let plainText = message.replace(/<\\/?[^>]+(>|$)/g, \"\");\n\n  plainText = plainText.replace(/\\s+/g, \" \").trim();\n\n  return { \n    json: { \n      conversationId: item.json.conversationId,\n      subject: item.json.subject,\n      email: item.json.customerEmail,\n      plainText\n    } \n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5584,
+        176
+      ],
+      "id": "fc5bd8be-d958-4eb8-b20b-5ca5dcb9b86d",
+      "name": "Get Plain Text Email Body"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini-2025-04-14",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI-2025-04-14"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "=You are a customer support email classifier.\n\nYou will receive:\n\n* The plain text content of an email\n* The conversation slug\n\nClassify the email into ONE of the following six categories and return ONLY the category, the provided conversation slug, AND a generated subject line in JSON format.\n\nCategories:\n\n* Product\n* Order\n* Delivery\n* Refund\n* Return\n* Miscellaneous\n\nCategory Descriptions:\n\nProduct:\nEmails asking about product details such as features, specifications, availability, sizing, compatibility, variations, colors, materials, or pricing.\n\nOrder:\nEmails about placing an order, modifying an order, canceling an order, confirming an order, or general order-related questions.\n\nDelivery:\nEmails asking about shipping status, tracking numbers, delivery times, shipping delays, or issues with receiving a package.\n\nRefund:\nEmails requesting a refund, asking about refund eligibility, or checking the status of a refund.\n\nReturn:\nEmails requesting to return a product or asking about the return process and return instructions.\n\nMiscellaneous:\nEmails that do not clearly fit into any of the above categories.\n\nSubject Rules:\n\n* Generate a concise, professional subject line (5–10 words).\n* The subject must clearly summarize the customer's intent.\n* Do NOT include emojis.\n* Do NOT use all caps.\n* Do NOT add quotation marks around the subject.\n\nSTRICT OUTPUT RULES:\n\n* Return valid JSON ONLY.\n* Do NOT include explanations or extra text.\n* Output must follow this exact structure:\n\n{\"category\":\"CategoryName\",\"slug\":\"conversation_slug_here\",\"subject\":\"Generated subject here\"}\n\n* Replace CategoryName with the correct category (capitalized exactly as listed).\n* Replace conversation_slug_here with the EXACT slug value provided in the input.\n* Do NOT modify, shorten, or regenerate the slug.\n* The subject must be newly generated based on the email content.\n* Do NOT return created_at.\n\nExample outputs:\n\n{\"category\":\"Return\",\"slug\":\"my-new-shipment-are-these-in-the-correct-size-i-wanted-to-exchange-my-last-order-they-were-too-small-i-could-not-put-my-foot-in-them-i-ordered-the-same-size-as-my-1st-order-that-was-11-dot-5-ew-red-my-\",\"subject\":\"Request to exchange incorrect size\"}\n\n{\"category\":\"Product\",\"slug\":\"are-these-shoes-waterproof-and-do-they-come-in-black-size-42\",\"subject\":\"Question about waterproof features and size availability\"}\n\n{\"category\":\"Delivery\",\"slug\":\"where-is-my-package-i-have-not-received-tracking-information-yet\",\"subject\":\"Request for shipping status update\"}\n"
+            },
+            {
+              "content": "=<plainText>\n{{ $json.conversationId }}\n{{ $json.subject }}\n{{ $json.plainText }}\n</plainText> "
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        5776,
+        176
+      ],
+      "id": "f0a16435-dcde-4133-91da-92ea6e882d62",
+      "name": "Email Classifier",
+      "credentials": {
+        "openAiApi": {
+          "id": "OvEyWchPL6ZDFbBd",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  // Parse the text from this item's output\n  const text = item.json.output[0].content[0].text;\n  const parsed = JSON.parse(text);\n\n  return { json: parsed };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6064,
+        176
+      ],
+      "id": "2c9cccbb-816a-4439-b4fb-3426b9d6a179",
+      "name": "Extract Email Category"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://musabela-usa.reamaze.io/api/v1/conversations/{{ $('Get Plain Text Email Body').item.json.conversationId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"conversation\": {\n    \"tag_list\": [\"{{ $json[\"category\"] }}\"]\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        6240,
+        176
+      ],
+      "id": "064183f5-8fd4-4347-b5d9-16916cba7ec4",
+      "name": "Put Label",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "hKE4jeIvYBRlbiB5",
+          "name": "Musabela Reamaze"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json}}",
+        "options": {
+          "systemMessage": "=You are a friendly and helpful customer support assistant.\nToday is {{ $now }}.\n\nYou will receive an email from the customer support inbox for the ecommerce store Musabela, which sells premium comfort-focused shoes designed for support, fit, and style.\n\nYour goal is to respond like a warm, approachable, and professional customer support agent who clearly and accurately answers customer inquiries.\n\nIf the email is unrelated to customer inquiries (for example: marketing emails, system updates, notifications, or internal messages), you should ignore it.\n\n--------------------------------------------------\nMANDATORY OUTPUT FORMAT\n--------------------------------------------------\nYou MUST return a single valid JSON object with EXACTLY the following four fields:\n\n{\n  \"customer_inquiry\": true,\n  \"message\": \"string\",\n  \"subject\":\"string\",\n  \"slug\":\"string\",\n  \"to_email\":\"string\"\n}\n\nRules:\n• If the email is a customer inquiry → set \"customer inquiry\" to true and include a response in \"message\".\n• If the email is NOT a customer inquiry → set \"customer inquiry\" to false and set \"message\" to an empty string \"\".\n• The to_email is supposed to return {{ $json.author.email }}\n• Do NOT include explanations, reasoning, or extra text outside of the JSON.\n• Do NOT wrap the JSON in markdown or code blocks.\n\n--------------------------------------------------\nTOOLS YOU MAY USE\n--------------------------------------------------\nYou may use tools ONLY when they are genuinely necessary to answer the customer correctly.\n\n1. \"Supabase Vector Store\"\nThis tool contains store policies and product details to be used as context when generating responses.\n\nStore policies include:\n• Company information\n• Communication style\n• Product categories\n• Ordering and payment\n• Shipping\n• Returns and exchanges\n• Refunds\n• Customer support escalation\n\nProduct details include:\n• Product IDs\n• Product handles\n• Product titles\n• Product descriptions\n• Basic product metadata\n\nUse this tool when policy or product context is required to respond accurately.\n\n2. \"get_order_data\"\nUse this tool ONLY if the customer is asking about an order, delivery, refund, return, or order-related issue.\nThis tool retrieves Shopify order data using the customer's email and order name (if available).\nIf no order email is specified, you may use the sender’s email.\n\n3. \"Get Shopify Product Information\"\nUse this tool ONLY when you need product-specific information such as:\n• Variants\n• Inventory availability\n• Variant IDs\n\nThe product ID can be determined by cross-referencing product titles or handles found in the \"Supabase Vector Store\".\n\n--------------------------------------------------\nIMPORTANT LINKING RULES\n--------------------------------------------------\n1. If suggesting a product, you MAY include the product URL in this format:\nhttps://my-store-2.myshopify.com/products/<PRODUCT-HANDLE>\n\nThe product handle MUST come directly from the \"Supabase Vector Store\".\n\n2. If referencing a specific variant, the variant ID must be obtained from:\n• The \"Supabase Vector Store\" (product ID)\n• Or the \"Get Shopify Product Information\" tool\n\nThe product + variant URL format is:\nhttps://my-store-2.myshopify.com/products/<PRODUCT-HANDLE>?variant=<VARIANT-ID>\n\n--------------------------------------------------\nCRITICAL TOOL USAGE & STOP RULE\n--------------------------------------------------\n• You are NOT required to use tools for every inquiry.\n• Use tools ONLY if they are needed to answer accurately.\n• Once you have enough information to answer the customer:\n  - IMMEDIATELY return the final JSON output\n  - DO NOT call any more tools\n  - DO NOT continue reasoning after producing the final response\n\n--------------------------------------------------\nRESPONSE GUIDELINES\n--------------------------------------------------\n• Be polite, warm, and professional\n• Keep responses clear and concise\n• Use Markdown formatting inside the \"message\" field\n• Do NOT invent policies, order data, or product details\n• If required information is missing, politely ask the customer for clarification instead of guessing",
+          "maxIterations": 3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        6704,
+        224
+      ],
+      "id": "076e9a80-cfe2-4656-9d53-8fa643b45641",
+      "name": "Draft Email"
+    },
+    {
+      "parameters": {
+        "content": "## Applying Label",
+        "height": 272,
+        "width": 832,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5536,
+        112
+      ],
+      "typeVersion": 1,
+      "id": "3027cb70-c30c-44a8-bb65-5fc566141e3a",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "conversations",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        4784,
+        192
+      ],
+      "id": "37b488e8-bca5-4315-af42-29e112769032",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "content": "## Shopify Customer Support Automation – Quick Guide\n\n\nThis workflow automatically fetches customer emails from Reamaze, classifies them, generates AI replies using store data, and sends responses back to customers.\n\n---\n### Helpful Links\nhttps://www.youtube.com/watch?v=5VKah2qUes0&t=1755s\nhttps://www.youtube.com/watch?v=xzUb6ER5FkY&t=481s\n\n\n### 1. What the Workflow Does\n\n1. Runs on a schedule (every few minutes).\n2. Pulls new customer conversations from Reamaze.\n3. Filters out system/tutorial emails.\n4. Converts email HTML into plain text.\n5. Uses AI to classify the email type:\n\n   * Product\n   * Order\n   * Delivery\n   * Refund\n   * Return\n   * Miscellaneous\n6. Applies the correct tag in Reamaze.\n7. Uses AI + store data to draft a response.\n8. Sends the reply automatically if it’s a real customer inquiry.\n\n---\n\n### 2. Required Accounts & Credentials\n\nYou must connect:\n\n* Reamaze API (Basic Auth with API token)\n* OpenAI API key\n* Shopify OAuth credentials\n* Supabase account (vector database)\n* Google Drive (for policy/product files)\n* Google Sheets (for product mapping)\n\n---\n\n### 3. One-Time Setup Steps\n\n#### A. Reamaze Setup\n\n1. Go to **Settings → Developers → API Tokens** in Reamaze.\n2. Create a token.\n3. In n8n, create **HTTP Basic Auth credential**:\n\n   * Username = your Reamaze email\n   * Password = API token\n\n---\n\n#### B. Product Mapping Setup\n\nThis workflow builds a sheet linking Shopify product IDs to handles.\n\n1. Export products from Shopify as CSV.\n2. Upload to Google Sheets.\n3. Create a second sheet for the workflow output.\n4. Run the workflow once.\n5. It fills the new sheet with:\n\n   * Product ID\n   * Product Handle\n\nThis is later used to generate product links in replies.\n\n---\n\n#### C. Vector Database Setup (Supabase)\n\nYou need to upload two data sources:\n\n1. Store policy document\n2. Product CSV (from previous step)\n\nSteps:\n\n1. Create Supabase project.\n2. Create a `documents` table (vector enabled).\n3. Run the workflow once per file to store embeddings.\n\nThis allows the AI to answer using your policies + product info.\n\n---\n\n### 4. How the AI Reply Works\n\nWhen a customer email arrives:\n\n1. AI checks if it’s a real inquiry.\n2. It searches your Supabase database for:\n\n   * Policies\n   * Product details\n3. If needed, it:\n\n   * Fetches Shopify product info\n   * Fetches customer order data (sub-workflow)\n4. AI drafts a Markdown reply.\n5. Workflow posts the reply back to Reamaze.\n\n---\n\n### 5. When to Run Each Part\n\n* Vector storage → run manually when updating documents\n* Product mapping → run when products change\n* Main workflow → keep ACTIVE for automation\n\n\n",
+        "height": 2608,
+        "width": 944,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3392,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "1ffc27cd-3412-4a24-9c41-a9b4b47f3efa",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cad850cf-97c2-4ace-9ac6-1d9efcb2576f",
+              "leftValue": "=  {{ $json.last_customer_message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e854c85d-5f0a-4a77-8c67-3ce3ee5e43c0",
+              "leftValue": "={{ $json.last_staff_message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5152,
+        192
+      ],
+      "id": "cb7e1261-4d53-44d9-9195-013d41189c19",
+      "name": "Filter: Unreplied Emails"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7f11c6ff-30fc-4b82-80b0-0b860340e47a",
+              "leftValue": "={{ $json.tag_list[0] }}",
+              "rightValue": "Return",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "f2ae62f8-f682-42c8-89aa-29630725d837",
+              "leftValue": "={{ $json.tag_list }}",
+              "rightValue": "Refund",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        6544,
+        16
+      ],
+      "id": "568665bd-0394-459c-9cef-e1715cd9151b",
+      "name": "Filter: Return & Refund"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  // Build the request body as a single object\n  const requestBody = {\n    conversation: {\n      assignee: \"kristina.topic1992@gmail.com\",  // Empty object, or fill with email if needed\n      tag_list: $input.first().json.tag_list, // Your tag\n      status: $input.first().json.status   // Status\n    }\n  };\n\n  return {\n    json: {\n      requestBody: JSON.stringify(requestBody) // Stringify for HTTP node\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6784,
+        0
+      ],
+      "id": "241b906b-784e-48c6-83dc-aa2685db2900",
+      "name": "Human: Form Body Response"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://musabela-usa.reamaze.io/api/v1/conversations/{{ $node[\"Get Plain Text Email Body\"].json.conversationId }}\n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"conversation\": {\n    \"tag_list\": [\"Return\"],\n    \"status\": \"open\"\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        6992,
+        0
+      ],
+      "id": "903fedef-db85-46f2-b7b7-9eeea291ddac",
+      "name": "Route Email to Human",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "hKE4jeIvYBRlbiB5",
+          "name": "Musabela Reamaze"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        7232,
+        0
+      ],
+      "id": "8eaf2015-32b3-4c07-89a0-6597aac85306",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "content": "## Human In the loop for Refunds & Returns",
+        "height": 240,
+        "width": 912,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6464,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "cfbb8179-fb60-4924-b5cc-d4840473baef",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "jsCode": "const conversations = $input.all();\n\nreturn conversations\n  .map(item => item.json)\n  .filter(conv => {\n    // Must have a customer message\n    if (!conv.last_customer_message?.body) return false;\n\n    // Remove system/marketing senders by email\n    const email = (conv.author?.email || \"\").toLowerCase();\n    if (\n      email.includes(\"reamaze\") ||\n      email.includes(\"shopify\") ||\n      email.includes(\"mailer\") ||\n      email.includes(\"noreply\") ||\n      email.includes(\"notif\")\n    ) return false;\n\n    // Remove marketing by subject keywords\n    const subject = (conv.subject || \"\").toLowerCase();\n    const marketingKeywords = [\"welcome\", \"newsletter\", \"promotion\", \"offer\", \"update\"];\n    if (marketingKeywords.some(keyword => subject.includes(keyword))) return false;\n\n    return true;\n  })\n  .map(conv => {\n    return {\n      json: {\n        conversationId: conv.slug || conv.id,\n        subject: conv.display_subject || conv.subject,\n        customerEmail: conv.author?.email || \"\",\n        message: conv.last_customer_message.body,\n        origin_id: conv.message?.origin_id || \"\",\n        url: conv.perma_url || \"\"\n      }\n    };\n  });"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5376,
+        176
+      ],
+      "id": "6ee4c7a3-3b8e-4ac7-97df-6f77b848a925",
+      "name": "Fetch Customer Inquiries"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        4688,
+        1088
+      ],
+      "id": "05747239-f731-4879-b982-f1bb6458a472",
+      "name": "Supabase Vector Store 1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "fOHnr6hwuA2tbn1O",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Store customer service question and answer database for answering customer inquiries",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        6896,
+        448
+      ],
+      "id": "0ede6083-8715-46ce-98e5-5ddd93c4486d",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "fOHnr6hwuA2tbn1O",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        4976,
+        192
+      ],
+      "id": "5a610024-a87f-401b-848b-ad0905750642",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "content": "## Made a single change\n## 5 emails will be processed per workflow execution\n ### Error was caused due to large number of emails being sent to the AI Node. I've limited that to 5 Items, you can change them as per your requirements in the limit node\n",
+        "height": 240,
+        "width": 384,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4848,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "7c11709d-0fcd-476c-99bc-64c3191076d3",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "87446c12-de6e-4d51-a8e9-3e0e4e0ab9bb",
+              "leftValue": "={{ $json.customer_inquiry }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        7328,
+        224
+      ],
+      "id": "b32f8260-0790-4771-8ba8-d36b4ad4579c",
+      "name": "Check If: Customer Inquiry",
+      "notes": "This node checks if the email it receives is genuinely a customer inquiry or just a promotion, offer etc. It only proceeds if the email is an actual customer inquiry"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  // Parse the JSON string inside \"output\"\n  const parsed = JSON.parse(item.json.output || \"{}\");\n  \n  return {\n    json: {\n      customer_inquiry: parsed.customer_inquiry ?? \"error\",\n      message: parsed.message ?? \"\",\n      subject:parsed.subject ?? \"\",\n      slug: parsed.slug ?? \"\",\n      to_email:parsed.to_email ?? \"\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7072,
+        224
+      ],
+      "id": "1e54ca3a-4ae8-4cdc-a064-192ac2d2eedd",
+      "name": "Parse Output"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "mzwuyHpONs21nJYJ",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/mzwuyHpONs21nJYJ",
+          "cachedResultName": "[Sub-Workflow] Get Customer Shopify Order Data"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('email', ``, 'string') }}",
+            "orderName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('orderName', ``, 'string') }}",
+            "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('description', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "orderName",
+              "displayName": "orderName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        6608,
+        480
+      ],
+      "id": "3bcd540f-29ba-43f5-9af6-02c27529f905",
+      "name": "Get Customer Shopify Order Data"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "product",
+        "operation": "get",
+        "productId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Product_ID', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.shopifyTool",
+      "typeVersion": 1,
+      "position": [
+        6720,
+        624
+      ],
+      "id": "670de1a6-ae2a-411c-914e-3b01ddaab46c",
+      "name": "Get Shopify Product Information",
+      "credentials": {
+        "shopifyOAuth2Api": {
+          "id": "4ujrTzPqFC3xapWF",
+          "name": "Shopify Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# UPDATED ALL POLICIES TO SUPABASE 25.02.26",
+        "height": 176,
+        "width": 400,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4736,
+        752
+      ],
+      "typeVersion": 1,
+      "id": "8eb14a3c-fea9-47b7-9ed9-a79b56d5476b",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://musabela-usa.reamaze.com/api/v1/conversations/{{ $json.slug }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"conversation\": {\n    \"status\": 8\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        7648,
+        448
+      ],
+      "id": "42453b07-1e4c-44d9-8351-2f6e7cde065c",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "hKE4jeIvYBRlbiB5",
+          "name": "Musabela Reamaze"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "support@musabela.com",
+        "toEmail": "={{ $json.to_email }}",
+        "subject": "={{ $json.message }}",
+        "html": "={{ $json.message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        7648,
+        208
+      ],
+      "id": "7a5e78d0-2ffa-44e7-a390-a0e7bc2d88ab",
+      "name": "Send an Email",
+      "webhookId": "79c0bd1b-99e3-4f24-b6cd-ec694e9a6b32",
+      "credentials": {
+        "smtp": {
+          "id": "hNzrqvdYmwiHWwxl",
+          "name": "Musabela"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store 1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store 1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Conversations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Draft Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Conversations": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Plain Text Email Body": {
+      "main": [
+        [
+          {
+            "node": "Email Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Classifier": {
+      "main": [
+        [
+          {
+            "node": "Extract Email Category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Email Category": {
+      "main": [
+        [
+          {
+            "node": "Put Label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Put Label": {
+      "main": [
+        [
+          {
+            "node": "Filter: Return & Refund",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft Email": {
+      "main": [
+        [
+          {
+            "node": "Parse Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Unreplied Emails": {
+      "main": [
+        [
+          {
+            "node": "Fetch Customer Inquiries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Return & Refund": {
+      "main": [
+        [
+          {
+            "node": "Human: Form Body Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Draft Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Human: Form Body Response": {
+      "main": [
+        [
+          {
+            "node": "Route Email to Human",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Email to Human": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Customer Inquiries": {
+      "main": [
+        [
+          {
+            "node": "Get Plain Text Email Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "Draft Email",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Filter: Unreplied Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If: Customer Inquiry": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Output": {
+      "main": [
+        [
+          {
+            "node": "Check If: Customer Inquiry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customer Shopify Order Data": {
+      "ai_tool": [
+        [
+          {
+            "node": "Draft Email",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Shopify Product Information": {
+      "ai_tool": [
+        [
+          {
+            "node": "Draft Email",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a144d953-ebae-4bcc-b6b8-db12c96f325d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8daa647d2dddb54c29eaf310d1801bb91c69f28f91dc2c5146b33278e9040ca2"
+  },
+  "id": "7nC9faiTFOYG1zvk",
+  "tags": []
+}
