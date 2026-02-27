@@ -1,0 +1,1421 @@
+{
+  "name": "Final - Abandoned Checkout Voice Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "fieldToSplitOut": "checkouts",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        6576,
+        2800
+      ],
+      "id": "d53917d6-28c5-4c02-831b-69c5e41c8e51",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://musabela-usa.myshopify.com/admin/api/2026-01/price_rules.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "shopifyOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"price_rule\": {\n    \"title\": \"{{ $('Return: Most Recent Cart per Customer').item.json.customer.first_name }}5\",\n    \"target_type\": \"line_item\",\n    \"target_selection\": \"all\",\n    \"allocation_method\": \"across\",\n    \"value_type\": \"percentage\",\n    \"value\": \"-5.00\",\n    \"customer_selection\": \"prerequisite\",\n    \"prerequisite_customer_ids\": [{{ $json.customer_id }}],\n    \"once_per_customer\": true,\n    \"starts_at\": \"{{ new Date().toISOString() }}\",\n    \"ends_at\": \"{{ new Date(new Date().getTime() + 10 * 60 * 1000).toISOString() }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        8160,
+        2656
+      ],
+      "id": "a4f888bf-a342-40bf-9b11-708bafcc2a61",
+      "name": "Create Price Rule",
+      "credentials": {
+        "shopifyOAuth2Api": {
+          "id": "ZHWnTW1j1dxBdkhv",
+          "name": "Shopify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://musabela-usa.myshopify.com/admin/api/2026-01/price_rules/{{ $json.price_rule.id }}/discount_codes.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "shopifyOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"discount_code\": { \"code\": \"{{ $json.price_rule.title }}\" }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        8368,
+        2656
+      ],
+      "id": "4e9af957-eaf3-4d9d-b9b5-921c69689db1",
+      "name": "Create Custom Discount Code",
+      "credentials": {
+        "shopifyOAuth2Api": {
+          "id": "ZHWnTW1j1dxBdkhv",
+          "name": "Shopify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1kA_JNhJ6C3kK69Ykjjf9dcPiL91g_IN2JzT9mkEDoKM",
+          "mode": "list",
+          "cachedResultName": "abandoned_checkout_calls",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kA_JNhJ6C3kK69Ykjjf9dcPiL91g_IN2JzT9mkEDoKM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kA_JNhJ6C3kK69Ykjjf9dcPiL91g_IN2JzT9mkEDoKM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "abandoned_checkout_id": "={{ $json.id }}",
+            "customer_id": "={{ $json.customer.id }}",
+            "customer_email": "={{ $json.customer.email }}",
+            "customer_fname": "={{ $json.customer.default_address.first_name }}",
+            "customer_lname": "={{ $json.customer.default_address.last_name }}",
+            "phone": "={{ $json.customer.default_address.phone }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "abandoned_checkout_id",
+              "displayName": "abandoned_checkout_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "checkout_url",
+              "displayName": "checkout_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "customer_id",
+              "displayName": "customer_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_email",
+              "displayName": "customer_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_fname",
+              "displayName": "customer_fname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_lname",
+              "displayName": "customer_lname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "discount_code",
+              "displayName": "discount_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_called_at",
+              "displayName": "last_called_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "discount_created_date",
+              "displayName": "discount_created_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "discount_ends_date",
+              "displayName": "discount_ends_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "usage_count",
+              "displayName": "usage_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        7392,
+        2800
+      ],
+      "id": "9a148d87-13d3-4d27-bc1e-d00d8df58d0a",
+      "name": "Add Customer Data",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HuqRXN3VIf4lehp8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "87f3834a-88b8-48f3-8750-0915b6f1cc16",
+              "leftValue": "={{ $json.last_called_at }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "97a59b3f-0ecd-4b8f-9a71-d3d9b9a4200b",
+              "leftValue": "={{ (Date.now() - new Date($json.last_called_at).getTime())}}",
+              "rightValue": 2592000000,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        7824,
+        2800
+      ],
+      "id": "399062a8-3e9f-4281-bbb6-363ec2e0b72a",
+      "name": "Check If: Previously Called"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1kA_JNhJ6C3kK69Ykjjf9dcPiL91g_IN2JzT9mkEDoKM",
+          "mode": "list",
+          "cachedResultName": "abandoned_checkout_calls",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kA_JNhJ6C3kK69Ykjjf9dcPiL91g_IN2JzT9mkEDoKM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kA_JNhJ6C3kK69Ykjjf9dcPiL91g_IN2JzT9mkEDoKM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "customer_id": "={{ $('Check If: Previously Called').item.json.customer_id }}",
+            "discount_code": "={{ $json.discount_code.code }}",
+            "discount_created_date": "={{ $json.discount_code.created_at }}",
+            "discount_ends_date": "={{ $('Create Price Rule').item.json.price_rule.ends_at }}",
+            "checkout_url": "={{ $('Extract email & phone').item.json.abandoned_checkout_url }}&discount={{ $json.discount_code.code }}"
+          },
+          "matchingColumns": [
+            "customer_id"
+          ],
+          "schema": [
+            {
+              "id": "abandoned_checkout_id",
+              "displayName": "abandoned_checkout_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "checkout_url",
+              "displayName": "checkout_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_id",
+              "displayName": "customer_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_email",
+              "displayName": "customer_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "customer_fname",
+              "displayName": "customer_fname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "customer_lname",
+              "displayName": "customer_lname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "discount_code",
+              "displayName": "discount_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_called_at",
+              "displayName": "last_called_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "discount_created_date",
+              "displayName": "discount_created_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "discount_ends_date",
+              "displayName": "discount_ends_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        8576,
+        2656
+      ],
+      "id": "ee943753-df1e-4c44-92a4-9074bd2765b1",
+      "name": "Append: Discount Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HuqRXN3VIf4lehp8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c738fc7e-1868-4fef-b655-98bb399cb73b",
+              "name": "abandoned_checkout_id",
+              "value": "={{ $('Check If: Previously Called').item.json.abandoned_checkout_id }}",
+              "type": "number"
+            },
+            {
+              "id": "51452dea-7400-4995-aa23-7c9ce9eec70b",
+              "name": "customer_id",
+              "value": "={{ $json.customer_id }}",
+              "type": "number"
+            },
+            {
+              "id": "b06a0589-66c5-41ed-b2bb-c937cb0ca5eb",
+              "name": "customer_fname",
+              "value": "={{ $('Get row(s) in sheet').item.json.customer_fname }}",
+              "type": "string"
+            },
+            {
+              "id": "f0420c3d-9e82-44aa-8d90-7f981c385272",
+              "name": "customer_email",
+              "value": "={{ $('Return: Most Recent Cart per Customer').item.json.customer.email }}",
+              "type": "string"
+            },
+            {
+              "id": "c65c602e-db31-48cf-a6b0-e8b29ee7e3f3",
+              "name": "phone",
+              "value": "={{ $('Check If: Previously Called').item.json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "7d8cf81c-76cd-4dba-933e-afa4db4fb9ad",
+              "name": "discount_code",
+              "value": "={{ $json.discount_code }}",
+              "type": "string"
+            },
+            {
+              "id": "48fdc049-c296-402d-b29a-8b5a78e94679",
+              "name": "discount_created_date",
+              "value": "={{ $json.discount_created_date }}",
+              "type": "string"
+            },
+            {
+              "id": "753aa590-4956-43c7-8965-af6a0cc2e797",
+              "name": "discount_ends_date",
+              "value": "={{ $json.discount_ends_date }}",
+              "type": "string"
+            },
+            {
+              "id": "79acceb2-f819-45ec-bff3-222546d6527f",
+              "name": "checkout_url",
+              "value": "={{ $json.checkout_url }}",
+              "type": "string"
+            },
+            {
+              "id": "5f8b2ac0-8b4e-43ed-a4c5-7b6fe562d661",
+              "name": "customer_lname",
+              "value": "={{ $('Get row(s) in sheet').item.json.customer_lname }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        8864,
+        2656
+      ],
+      "id": "74bc6a4e-3206-4d15-8783-7a19897dadf9",
+      "name": "Structure Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.retellai.com/v2/create-phone-call",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer key_f665bc0ec8877e65017558726a62"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from_number\": \"+14179951600\",\n  \"to_number\": \"+{{ $json.phone }}\",\n  \"call_type\": \"phone_call\",\n  \"override_agent_id\": \"agent_63e302e4186f826012c7b8e16c\",\n  \"retell_llm_dynamic_variables\": {\n    \"customer_name\": \"{{ $json.customer_fname }}\",\n    \"customer_email\": \"{{ $json.customer_email}}\",\n    \"discount_code\": \"{{ $json.discount_code }}\"\n  }\n}\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        9072,
+        2656
+      ],
+      "id": "44497480-5d0f-4ed4-9ede-80f256453872",
+      "name": "Place Call"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1e-Kt64E0KQuv41lU6KrDAYDJbi1HQZBeaE0tp7xwWyY",
+          "mode": "list",
+          "cachedResultName": "abandoned_checkout_calls",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1e-Kt64E0KQuv41lU6KrDAYDJbi1HQZBeaE0tp7xwWyY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1e-Kt64E0KQuv41lU6KrDAYDJbi1HQZBeaE0tp7xwWyY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "customer_id": "={{ $('Structure Data').item.json.customer_id }}",
+            "last_called_at": "={{ new Date($json.end_timestamp).toISOString() }}"
+          },
+          "matchingColumns": [
+            "customer_id"
+          ],
+          "schema": [
+            {
+              "id": "abandoned_checkout_id",
+              "displayName": "abandoned_checkout_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "checkout_url",
+              "displayName": "checkout_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "customer_id",
+              "displayName": "customer_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_email",
+              "displayName": "customer_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "customer_fname",
+              "displayName": "customer_fname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "customer_lname",
+              "displayName": "customer_lname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "discount_code",
+              "displayName": "discount_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_called_at",
+              "displayName": "last_called_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "discount_created_date",
+              "displayName": "discount_created_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "discount_ends_date",
+              "displayName": "discount_ends_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        9616,
+        2656
+      ],
+      "id": "f6488119-f899-4d8c-aa94-38fe08e9bf33",
+      "name": "Log: Call Date",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HuqRXN3VIf4lehp8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Abandoned Checkout Voice Agent",
+        "height": 560,
+        "width": 3764
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6048,
+        2512
+      ],
+      "typeVersion": 1,
+      "id": "6c1a9b6f-3daa-4243-927b-5a43a84ae9ba",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "url": "https://musabela-usa.myshopify.com/admin/api/2026-01/checkouts.json?status=abandoned",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "shopifyOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        6352,
+        2800
+      ],
+      "id": "ea256f9a-7eda-42a3-a8cd-0d421f24db72",
+      "name": "Fetch Abandoned Checkout",
+      "credentials": {
+        "shopifyOAuth2Api": {
+          "id": "4ujrTzPqFC3xapWF",
+          "name": "Shopify Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 12
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        6128,
+        2800
+      ],
+      "id": "a7336294-e80d-4883-94de-8a6332d4f4a5",
+      "name": "Run Daily at Noon"
+    },
+    {
+      "parameters": {
+        "content": "## Fetch Oldest Abandoned Cart Per Customer",
+        "height": 304,
+        "width": 1668,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6080,
+        2704
+      ],
+      "typeVersion": 1,
+      "id": "62b23066-2388-4432-901e-2f2430e38bec",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Create Custom Discount (Valid 15 min)",
+        "height": 256,
+        "width": 640,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        8096,
+        2576
+      ],
+      "typeVersion": 1,
+      "id": "0dab7137-8a82-4c4c-b1e1-f418846b2d6c",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Place Call",
+        "height": 256,
+        "width": 976,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        8800,
+        2576
+      ],
+      "typeVersion": 1,
+      "id": "a89a19f1-a9ff-452b-931e-2685550ec10f",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Guide\n\n# Required Connections & Setup\n\n## 1️⃣ Shopify Connection\n\nNode: **Fetch Abandoned Checkout** + Discount Nodes\n\nYou must:\n\n* Connect **Shopify OAuth2**\n* Use the correct store domain\n* Make sure API version is valid\n* Ensure app has permissions:\n\n  * read_checkouts\n  * write_price_rules\n  * write_discounts\n\nIf this fails → discounts will not generate.\n\n---\n\n## 2️⃣ Google Sheets Setup\n\nUsed for:\n\n* Logging customers\n* Preventing duplicate calls\n* Storing discount codes\n* Storing call timestamps\n\nYou must:\n\n* Connect Google Sheets OAuth2\n* Select the correct Spreadsheet\n* Ensure sheet has these columns:\n\n```\nabandoned_checkout_id\ncustomer_id\ncustomer_email\ncustomer_fname\ncustomer_lname\nphone\ncheckout_url\ndiscount_code\ndiscount_created_date\ndiscount_ends_date\nlast_called_at\n```\n\nImportant:\n\n* `customer_id` must be used as the matching column\n* Do not rename column headers after setup\n\nIf sheet mapping breaks → calls may repeat.\n\n---\n\n## 3️⃣ Retell AI Configuration\n\nNode: **Place Call**\n\nYou must configure:\n\n* ✅ Valid Retell API Key (Bearer token)\n* ✅ Correct `override_agent_id`\n* ✅ Verified `from_number`\n* ✅ Phone numbers in international format (+1, +966, etc.)\n\n---\n\n### Retell Agent Requirements\n\nInside your Retell agent:\n\nYou must support these dynamic variables:\n\n```\ncustomer_name\ncustomer_email\ndiscount_code\n```\n\nIf these are missing in your agent prompt → variables won’t inject properly.\n\n---\n\n",
+        "height": 1952,
+        "width": 640,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4384,
+        2512
+      ],
+      "typeVersion": 1,
+      "id": "c1614727-a0bd-40c3-abd3-d97b4147c4e1",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/send-checkout-email",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        6112,
+        3184
+      ],
+      "id": "379baaca-a579-483d-bbc5-cbc2e5eb1d2c",
+      "name": "Webhook",
+      "webhookId": "ef305e58-df2e-4574-af07-5c918884c14a"
+    },
+    {
+      "parameters": {
+        "content": "## Send Email",
+        "height": 272,
+        "width": 944,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6048,
+        3104
+      ],
+      "typeVersion": 1,
+      "id": "51510b55-8b2d-4720-ae27-236f4d8dcd6d",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const checkout = item.json;\n\n  // ---- EMAIL PRIORITY ----\n  const email =\n    checkout.email ||\n    checkout.customer?.email ||\n    null;\n\n  // ---- PHONE PRIORITY ----\n  const rawPhone =\n    checkout.phone ||\n    checkout.customer?.phone ||\n    checkout.shipping_address?.phone ||\n    checkout.billing_address?.phone ||\n    null;\n\n  // ---- CLEAN PHONE (remove spaces) ----\n  const phone = rawPhone\n    ? rawPhone.replace(/\\s+/g, '').trim()\n    : null;\n\n  return {\n    json: {\n      ...checkout,\n      extracted_email: email,\n      extracted_phone: phone,\n      has_email: !!email,\n      has_phone: !!phone\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6992,
+        2800
+      ],
+      "id": "047af67b-b95b-4e92-83e5-832866b69b70",
+      "name": "Extract email & phone"
+    },
+    {
+      "parameters": {
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        9264,
+        2656
+      ],
+      "id": "43c662c8-3c65-4b81-984a-8c59ae802069",
+      "name": "Wait",
+      "webhookId": "4b2c2eed-7f41-4f63-bc70-dc3b6eca208d"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.retellai.com/v2/get-call/{{ $('Place Call').item.json.call_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer key_f665bc0ec8877e65017558726a62"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        9456,
+        2656
+      ],
+      "id": "79fbe40b-bdda-4704-8b36-6995c4292263",
+      "name": "Get call Info"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1kA_JNhJ6C3kK69Ykjjf9dcPiL91g_IN2JzT9mkEDoKM",
+          "mode": "list",
+          "cachedResultName": "abandoned_checkout_calls",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kA_JNhJ6C3kK69Ykjjf9dcPiL91g_IN2JzT9mkEDoKM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kA_JNhJ6C3kK69Ykjjf9dcPiL91g_IN2JzT9mkEDoKM/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        7584,
+        2800
+      ],
+      "id": "c0ca6588-2cff-435e-9f98-cda0cd72a093",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HuqRXN3VIf4lehp8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        7184,
+        2800
+      ],
+      "id": "90a671f6-230b-4e52-a524-37a763a70881",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cartsByCustomer = {};\n\nfor (const item of items) {\n  const checkout = item.json;\n\n  // Build a reliable customer key\n  const customerKey =\n    checkout.customer?.id ||\n    checkout.phone;\n\n  if (!customerKey) continue;\n\n  // If customer not seen yet, store cart\n  if (!cartsByCustomer[customerKey]) {\n    cartsByCustomer[customerKey] = checkout;\n    continue;\n  }\n\n  // Compare dates → keep NEWEST\n  const existingDate = new Date(cartsByCustomer[customerKey].created_at);\n  const currentDate = new Date(checkout.created_at);\n\n  if (currentDate > existingDate) {\n    cartsByCustomer[customerKey] = checkout;\n  }\n}\n\n// Return only the newest cart per customer\nreturn Object.values(cartsByCustomer).map(cart => ({\n  json: cart\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6768,
+        2800
+      ],
+      "id": "e6659336-4273-4aa8-ace5-54014490e962",
+      "name": "Return: Most Recent Cart per Customer"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.retellai.com/create-batch-call",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer key_f665bc0ec8877e65017558726a62"
+            },
+            {
+              "name": "Content_Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"name\": \"Musabela Cart Recovery\",\n  \"from_number\": \"+14157774444\",\n  \"tasks\": {{ $items().map(item => ({\n    to_number: item.json.phone,\n    \"override_agent_id\": \"agent_ABC123\",\n    retell_llm_dynamic_variables: {\n      customer_name: item.json.customer_name,\n      checkout_url: item.json.checkout_url,\n      discount_code: item.json.discount_code\n    }\n  })) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        9072,
+        2880
+      ],
+      "id": "5bea4367-8be3-4366-a57a-92608dc251cd",
+      "name": "Place Call1"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        6800,
+        3184
+      ],
+      "id": "b4f8765f-7212-462a-ae69-a2299dc210d6",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "fromEmail": "support@musabela.com",
+        "toEmail": "aqsasif.dev@gmail.com",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        6560,
+        3184
+      ],
+      "id": "07c91231-58c6-43c3-b515-cf5170cc897d",
+      "name": "Send an Email",
+      "webhookId": "95f16b30-0eda-413b-825e-fb046251f012",
+      "credentials": {
+        "smtp": {
+          "id": "hNzrqvdYmwiHWwxl",
+          "name": "Musabela"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1e-Kt64E0KQuv41lU6KrDAYDJbi1HQZBeaE0tp7xwWyY",
+          "mode": "list",
+          "cachedResultName": "abandoned_checkout_calls",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1e-Kt64E0KQuv41lU6KrDAYDJbi1HQZBeaE0tp7xwWyY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1e-Kt64E0KQuv41lU6KrDAYDJbi1HQZBeaE0tp7xwWyY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "customer_email",
+              "lookupValue": "={{ $json.body.customer_email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        6320,
+        3184
+      ],
+      "id": "bc12f2bb-e7f5-4966-9520-2e0ba36dc6e4",
+      "name": "Get row(s) in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HuqRXN3VIf4lehp8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.customer_email }}",
+        "subject": "Enjoy This Exclusive Discount 🎉",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Your Exclusive Discount</title>\n</head>\n<body style=\"margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, Helvetica, sans-serif;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f4f4f4; padding:40px 0;\">\n    <tr>\n      <td align=\"center\">\n        <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#ffffff; padding:40px; text-align:center;\">\n          \n          <tr>\n            <td style=\"font-size:24px; font-weight:600; color:#111111; padding-bottom:20px;\">\n              A Private Offer, Just for You\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"font-size:16px; color:#555555; padding-bottom:30px; line-height:1.6;\">\n              To celebrate, we’re offering you an exclusive discount on your next pair.  \n              Use the code below at checkout.\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"font-size:18px; font-weight:600; letter-spacing:2px; color:#111111; padding:15px 0; border:1px solid #dddddd;\">\n              {{ $json.discount_code }}\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding:30px 0;\">\n              <a href=\"{{ $json.checkout_url }}\"\n                 style=\"background-color:#111111; color:#ffffff; text-decoration:none; padding:14px 32px; font-size:14px; letter-spacing:1px; display:inline-block;\">\n                 SHOP NOW\n              </a>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"font-size:12px; color:#999999; padding-top:20px;\">\n              Limited time offer. Terms apply.\n            </td>\n          </tr>\n\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        6800,
+        3424
+      ],
+      "id": "785bcdab-7924-494f-8c32-83c26b9cc282",
+      "name": "Send a message",
+      "webhookId": "6b646ee9-4fd6-46d4-a927-50b3a9d53b63"
+    },
+    {
+      "parameters": {
+        "content": "# 📞 Call Placement & Retell Configuration\n\n## 1️⃣ Agent ID\n\n* The **agent_id** is available at the top of your Retell agent prompt page.\n* Copy it exactly.\n* Paste it inside the HTTP node:\n\n```json\n\"override_agent_id\": \"agent_xxxxxxxxx\"\n```\n\nIf the agent ID is wrong → the call will fail.\n\n---\n\n## 2️⃣ Dynamic Variables (VERY IMPORTANT)\n\nInside the Retell API body you send:\n\n```json\n\"retell_llm_dynamic_variables\": {\n  \"customer_name\": \"...\",\n  \"customer_email\": \"...\",\n  \"discount_code\": \"...\"\n}\n```\n\n### Critical Rules:\n\n1. Every variable used inside your agent prompt\n   **MUST be declared inside** `retell_llm_dynamic_variables`.\n\n2. The variable names must match **exactly**.\n\nIf your agent prompt says:\n\n```\nHi {{customer_name}}, your code is {{discount_code}}\n```\n\nThen your API must send:\n\n```json\n\"customer_name\": \"...\",\n\"discount_code\": \"...\"\n```\n\n⚠ If spelling differs (example: `customerName` vs `customer_name`)\n→ It will NOT inject.\n\nNo automatic mapping happens. Names must match 100%.\n\n---\n\n## 3️⃣ Agent Prompt Setup\n\nInside Retell Agent Prompt:\n\nUse variables like:\n\n```\n{{customer_name}}\n{{customer_email}}\n{{discount_code}}\n```\n\nDo NOT rename them unless you also rename them in:\n\n```\nretell_llm_dynamic_variables\n```\n\nThey must be identical.\n\n---\n\n# 🔧 Tool Function Setup (Inside Retell Agent)\n\nIf your agent needs to trigger n8n (for example to send email):\n\n### Step 1 — Create Tool in Retell\n\nAdd a Tool:\n\n* Type: Webhook / HTTP\n* Method: POST\n* URL: Your n8n Production Webhook URL\n* Example:\n\n```\nhttps://yourdomain/webhook/send-checkout-email\n```\n\n### Step 2 — Tool Parameters\n\nDefine parameters like:\n\n```json\n{\n  \"customer_email\": \"string\"\n}\n```\n\nThese parameters must match what your n8n webhook expects.\n\n---\n\n# 🌐 n8n Webhook Setup\n\nWebhook node:\n\n* Method: POST\n* Path:\n\n```\n/send-checkout-email\n```\n\n* Response Mode: Respond to Webhook Node\n* Use Production URL (not test)\n\n---\n\n## Webhook Flow Logic\n\n1. Retell tool sends:\n\n```json\n{\n  \"customer_email\": \"example@email.com\"\n}\n```\n\n2. n8n:\n\n   * Looks up Google Sheet by customer_email\n   * Gets discount_code + checkout_url\n   * Sends email\n   * Responds 200\n\n---\n\n# ⚠ Common Mistakes\n\n* Variable name mismatch\n* Agent ID incorrect\n* Using Test webhook URL instead of Production\n* Tool parameter name doesn’t match webhook lookup field\n* Forgetting to include variable inside `retell_llm_dynamic_variables`\n\n\n",
+        "height": 3792,
+        "width": 640,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5104,
+        2512
+      ],
+      "typeVersion": 1,
+      "id": "d90829c6-f61b-48a9-ae5b-e500fb782cca",
+      "name": "Sticky Note6"
+    }
+  ],
+  "pinData": {
+    "Run Daily at Noon": [
+      {
+        "json": {
+          "timestamp": "2026-02-26T19:33:28.261+05:00",
+          "Readable date": "February 26th 2026, 7:33:28 pm",
+          "Readable time": "7:33:28 pm",
+          "Day of week": "Thursday",
+          "Year": "2026",
+          "Month": "February",
+          "Day of month": "26",
+          "Hour": "19",
+          "Minute": "33",
+          "Second": "28",
+          "Timezone": "Asia/Karachi (UTC+05:00)"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "aqsasiff.app.n8n.cloud",
+            "user-agent": "axios/1.13.2",
+            "content-length": "42",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "100.20.5.228",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "US",
+            "cf-ray": "9d40b5e5c883f8cb-PDX",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "x-forwarded-for": "100.20.5.228, 104.23.160.235",
+            "x-forwarded-host": "aqsasiff.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-106-cd585c94f-p2cth",
+            "x-is-trusted": "yes",
+            "x-real-ip": "100.20.5.228",
+            "x-retell-signature": "v=1772122204915,d=96274ad67ca557adc2e7ab0ad66eba32816461aeb5c96560b97710d4f8d27607"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "customer_email": "aqsasif.dev@gmail.com"
+          },
+          "webhookUrl": "https://aqsasiff.app.n8n.cloud/webhook/send-checkout-email",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Return: Most Recent Cart per Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Price Rule": {
+      "main": [
+        [
+          {
+            "node": "Create Custom Discount Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Custom Discount Code": {
+      "main": [
+        [
+          {
+            "node": "Append: Discount Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Customer Data": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If: Previously Called": {
+      "main": [
+        [
+          {
+            "node": "Create Price Rule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append: Discount Data": {
+      "main": [
+        [
+          {
+            "node": "Structure Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure Data": {
+      "main": [
+        [
+          {
+            "node": "Place Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Place Call": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Abandoned Checkout": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Daily at Noon": {
+      "main": [
+        [
+          {
+            "node": "Fetch Abandoned Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract email & phone": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get call Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get call Info": {
+      "main": [
+        [
+          {
+            "node": "Log: Call Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Check If: Previously Called",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Add Customer Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return: Most Recent Cart per Customer": {
+      "main": [
+        [
+          {
+            "node": "Extract email & phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "Send an Email": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5f4d093b-ca9a-448a-a2dd-04e321e6afcc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8daa647d2dddb54c29eaf310d1801bb91c69f28f91dc2c5146b33278e9040ca2"
+  },
+  "id": "61LY7LntkPn012r5",
+  "tags": []
+}
