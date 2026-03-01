@@ -1,0 +1,711 @@
+{
+  "name": "Short-form Video Ads Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        -160
+      ],
+      "id": "1626e7d0-9721-4c54-902f-70b029d3a348",
+      "name": "Telegram Trigger",
+      "webhookId": "5fbe30e7-23b4-41e1-8eab-2d027d53228c",
+      "credentials": {
+        "telegramApi": {
+          "id": "DaKKhORQ1lU7FnJK",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7e4912e4-3417-4b64-babe-05de6a6b9f8a",
+              "name": "ratio",
+              "value": "landscape",
+              "type": "string"
+            },
+            {
+              "id": "5db67a3b-bc86-4cb9-829f-5eca721579a5",
+              "name": "Kie API Key",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -160
+      ],
+      "id": "a9ab38e7-379e-4722-aa18-c308d9cdc1aa",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get data from the \"Telegram Trigger\" node\nconst telegramData = $('Telegram Trigger').item.json;\n\n// Get an array of photos\nconst photos = telegramData.message.photo;\n\n// If no photo is found, return an empty result\nif (!photos || photos.length === 0) {\n  return { json: { error: 'No photos found' } };\n}\n\n// Find the photo with the maximum width\nconst highestResPhoto = photos.reduce((max, photo) => {\n  return photo.width > max.width ? photo : max;\n}, photos[0]);\n\n// Return ONLY the selected photo\nreturn {\n  json: highestResPhoto\n};\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        -160
+      ],
+      "id": "509f2a25-e18c-45bb-8174-82e7dfb31b11",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        -160
+      ],
+      "id": "ed58e5a3-5f8f-41e8-a7fb-54d8d0212d51",
+      "name": "Get a file",
+      "webhookId": "e759f6e4-a18b-426d-a533-4d41a29d648c",
+      "credentials": {
+        "telegramApi": {
+          "id": "DaKKhORQ1lU7FnJK",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "=Photo  {{ $('Telegram Trigger').item.json.message.message_id }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1uEmawZmlxnH8TfON0YAjSHHfL3rze6U4",
+          "mode": "list",
+          "cachedResultName": "AI Creative Agent",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1uEmawZmlxnH8TfON0YAjSHHfL3rze6U4"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        912,
+        -160
+      ],
+      "id": "4ce9d7c4-c633-4250-b219-ab2bf5ec4be7",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "8HYJQEwfSdL0fCm3",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "writer",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1152,
+        -160
+      ],
+      "id": "987b7bd7-336b-472b-a176-10081896972a",
+      "name": "Share file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "8HYJQEwfSdL0fCm3",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "=Analyze the uploaded image and describe it in cinematic, production-ready terms.\n\nReturn JSON with these fields:\n\n{\n  \"main_subject\": \"primary focus (e.g., man running, perfume bottle, luxury car, smiling woman)\",\n  \"subject_position\": \"center / left / right / close-up / wide / top-down / etc.\",\n  \"environment\": \"describe background or setting (e.g., beach at sunset, modern office, urban street, green forest)\",\n  \"lighting\": \"type and quality of light (e.g., warm golden hour, moody shadows, bright studio light)\",\n  \"color_palette\": \"dominant tones (e.g., beige and gold, blue and white, neon pink and cyan)\",\n  \"style\": \"visual or artistic style (e.g., cinematic realism, minimalistic fashion, tech aesthetic, natural documentary)\",\n  \"emotion_tone\": \"overall mood (e.g., calm, excitement, luxury, mystery, inspiration)\",\n  \"action_or_motion\": \"visible or implied movement (e.g., walking, wind, pouring, camera pan)\",\n  \"camera_perspective\": \"type of shot (macro, medium, wide, tracking, overhead, dolly)\",\n  \"potential_genre\": \"product_commercial / fashion / lifestyle / travel / tech / cinematic / nature / art\",\n  \"potential_vibe\": \"short creative tone summary (e.g., modern elegance, energetic motion, serene minimalism)\",\n  \"contextual_elements\": \"secondary visual hints (props, reflections, accessories, surrounding textures, lighting accents)\"\n}\n\nGuidelines:\n\nKeep phrasing professional and descriptive, not poetic.\n\nAlways fill all fields (infer if needed).\n\nReturn JSON only, no comments or text outside braces.\n\nDo not add ```json```.\n\nExample Output:\n\n{\n  \"main_subject\": \"a luxury perfume bottle standing on a marble table\",\n  \"subject_position\": \"center close-up shot\",\n  \"environment\": \"dark studio background with gold reflections\",\n  \"lighting\": \"soft directional spotlight from top right, warm tone\",\n  \"color_palette\": \"black, gold, and beige\",\n  \"style\": \"cinematic product aesthetic\",\n  \"emotion_tone\": \"luxury and mystery\",\n  \"action_or_motion\": \"gentle rotation of bottle with floating mist\",\n  \"camera_perspective\": \"macro focus with shallow depth of field\",\n  \"potential_genre\": \"product_commercial\",\n  \"potential_vibe\": \"elegant minimalism\",\n  \"contextual_elements\": \"reflections, light flares, subtle particles in air\"\n}",
+        "imageUrls": "={{ $json.photo_direct }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        64,
+        160
+      ],
+      "id": "de07a4a1-d5ff-4a99-94da-339c3c6b61b1",
+      "name": "Analyze image",
+      "credentials": {
+        "openAiApi": {
+          "id": "b23Q9Bl7SDTTHmv9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        336
+      ],
+      "id": "53582a05-e8c3-4736-9f68-41e7ed181670",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "b23Q9Bl7SDTTHmv9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Product Description: {{ $json['0'].content[0].text }}\nVideo Suggestion: {{ $('Telegram Trigger').item.json.message.caption }}",
+        "options": {
+          "systemMessage": "=You are an **AI film director and Sora 2 prompt engineer**.\nReceive all **product description data** and **creative wishes** provided by the user.\nBegin with a concise checklist (3–7 bullets) of what you will do, keeping items conceptual and not implementation-level. Your mission is to craft a **short, ultra-realistic, high-end 10-second TV commercial prompt** that embodies a genuine brand campaign—cinematic, emotional, and visually dynamic.\nThe video should depict **real people** presenting or interacting naturally and aspirationally with the product.\nIt must contain **multiple cinematic shots (~3–5)** that blend fluidly, creating the feel of a premium commercial—not a static or single-shot sequence.\nDo **not** list or label scenes; instead, describe the ad as one continuous cinematic experience so **Sora** can organically handle shot transitions.\n\n---\n## 🧑‍🎨 OUTPUT FORMAT\n[Provide the streamlined, cinematic prompt as described in the guidelines below.]\nAfter producing the commercial prompt, validate that it meets all requirements: dynamic 3–5 shot flow, human presence, lighting and motion emphasis, concise (6–8 lines), and appropriate brand/visual style. If any element is missing, revise accordingly.\n---\n## 🧠 BRAND STYLE ADAPTATION LOGIC\nAutomatically tailor the tone and visual style according to the product data:\n- **Tech / futuristic** → *Apple style*: clean, minimalist, innovative, precise.\n- **Luxury / fashion / perfume** → *Dior style*: elegant, sensual, artistic, cinematic.\n- **Sport / lifestyle** → *Nike style*: energetic, motivational, golden-hour motion.\n- **Auto / mechanical** → *BMW style*: powerful, sophisticated, metallic reflections.\n- **Other / neutral** → *Generic premium style*: emotional realism, aspirational tone.\nIf the user specifies a creative direction, **always prioritize that**.\n\n---\n## 🛩️ EXAMPLE OUTPUT\n> Ultra-realistic high-end 10-second TV commercial in the spirit of Apple.\n> Cool white studio light glides over the metallic orange smartphone as hands lift it from a reflective table.\n> The scene transitions between close-ups of glass, edges, and a calm face illuminated by moving reflections.\n> Soft shadows and lens flares dance as the phone rotates, revealing the triple-lens design.\n> Fingers tap the glowing screen—a smooth animation responds, light wrapping around the edges.\n> The pace feels elegant and futuristic, every frame breathing precision and artistry.\n> A minimal score builds under a quiet voice-over: *“Designed to feel alive.”*\n---\n\n## 🎥 INTERNAL LOGIC\n- Always open with: **“Ultra-realistic high-end 10-second TV commercial…”**\n- The description must **imply several dynamic shots (3–5)** without numbering or segmenting them.\n- Always incorporate **humans** interacting with the product (hands, gestures, faces).\n- Highlight **lighting and motion** as central storytelling tools (reflections, flares, slow pans).\n- End with a **sound or voice-over** cue.\n- Keep the entire prompt **6–8 lines maximum**—concise, cinematic, emotionally rich.\n---\n\n✅ With this prompt, the agent:\n- reads the product description and creative wishes,\n- automatically determines the **brand style** and visual tone,\n- generates a **dynamic 10-second, TV-level ad prompt** showcasing authentic human presence,\n- and delivers the cinematic flow Sora understands best—featuring light, rhythm, emotion, and movement without technical structuring."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        320,
+        160
+      ],
+      "id": "dd3852f7-b762-4b3a-b71b-03fe38a01ccf",
+      "name": "Commercial Video Director"
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        928,
+        160
+      ],
+      "id": "194b3e99-9d46-4104-92c1-232a4440c8ee",
+      "name": "Wait",
+      "webhookId": "10d4ece5-9280-4ef9-88c5-8800f37f4b63"
+    },
+    {
+      "parameters": {
+        "url": "={{ JSON.parse($json.data.resultJson).resultUrls[0] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        112,
+        624
+      ],
+      "id": "8652e83e-9b3d-4240-9a91-58b6fa778cf4",
+      "name": "HTTP Request2",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        608
+      ],
+      "id": "77f3d427-3eac-4d6a-a894-7d4d1757c4cd",
+      "name": "Send a video",
+      "webhookId": "3f63cd4c-6aa1-40a6-98ae-5e0c3687117d",
+      "credentials": {
+        "telegramApi": {
+          "id": "DaKKhORQ1lU7FnJK",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2b26b077-e834-4aa3-afbd-c93dc9c150c1",
+              "name": "photo_direct",
+              "value": "=https://drive.google.com/uc?export=view&id={{ $('Upload file').item.json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1392,
+        -160
+      ],
+      "id": "3d84520a-3cb6-4091-b167-a22bde1e9ee2",
+      "name": "Get Photo Link"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Edit Fields').item.json['Kie API Key'] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"sora-2-image-to-video-stable\",\n  \"input\": {\n   \"prompt\": {{ JSON.stringify($('Commercial Video Director').item.json.output) }},\n    \"image_urls\": [\n    \"{{ $('Get Photo Link').item.json.photo_direct }}\"\n    ],\n    \"aspect_ratio\": \"{{ $('Edit Fields').item.json.ratio }}\",\n    \"quality\": \"hd\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        688,
+        160
+      ],
+      "id": "2cd61aec-c969-456b-a21a-9c9c5b735809",
+      "name": "Generate Ad"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Edit Fields').item.json['Kie API Key'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1152,
+        160
+      ],
+      "id": "3febf682-41ff-47c3-86fc-3aaeb060f694",
+      "name": "Check Status"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8be20b25-3fb4-4ecd-8ec7-892bfdf3053d",
+              "leftValue": "={{ $json.data.state }}",
+              "rightValue": "=success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1392,
+        160
+      ],
+      "id": "5138efe2-5da0-4eed-83bb-9146be2cc168",
+      "name": "Check If: Success"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $('Commercial Video Director').item.json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        608
+      ],
+      "id": "ec0e8244-21f9-4b26-824f-52b4368fc980",
+      "name": "Send Video Description",
+      "webhookId": "87d4c85b-3feb-4cdd-9506-a054e77560ab",
+      "credentials": {
+        "telegramApi": {
+          "id": "DaKKhORQ1lU7FnJK",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "⚠️ Video generation error. Retry again",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        816
+      ],
+      "id": "01bf0d22-c931-4a6c-a735-2cb3c6612e2b",
+      "name": "Send Error Message",
+      "webhookId": "4062db55-f4cb-4262-860a-52fd480efce3",
+      "credentials": {
+        "telegramApi": {
+          "id": "DaKKhORQ1lU7FnJK",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Image Handling",
+        "height": 272,
+        "width": 1584
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "1dd3516e-3294-45f4-9e86-bb2285a2665b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Video Commercial Generation",
+        "height": 416,
+        "width": 1584,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "87570a0f-0f1c-47dd-a991-5346d510ef08",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Send Results to Telegram",
+        "height": 512,
+        "width": 1584,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        512
+      ],
+      "typeVersion": 1,
+      "id": "18700fa1-3e28-41e9-9bac-c354613391c7",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Here is the **very straight-forward setup guide** for your workflow :\n\n---\n\n# STEP 1 — Add your Kie API key\n\nGo to node: **Edit Fields**\n\nSet:\n\n```\nKie API Key = your_actual_kie_api_key_here\n```\n\nExample:\n\n```\nsk-abc123xyz\n```\n\n---\n\n# STEP 2 — Set video ratio\n\nIn same node (**Edit Fields**), set:\n\n```\nratio = landscape\n```\n\nOR\n\n```\nratio = portrait\n```\n\nUse:\n\n* `landscape` → horizontal video\n* `portrait` → vertical video\n\n---\n\n# STEP 3 — Make sure Google Drive works\n\nCheck these nodes are connected and authenticated:\n\n* Upload file → Google Drive account connected\n* Share file → permission set to:\n\n```\nRole: writer\nType: anyone\n```\n\nThis makes image public.\n\n---\n\n# STEP 4 — Make sure OpenAI works\n\nCheck credentials exist in:\n\n* Analyze image node → OpenAI account connected\n* OpenAI Chat Model node → OpenAI account connected\n* Commercial Video Director → connected to Chat Model\n\n---\n\n# STEP 5 — Activate workflow\n\nClick:\n\n```\nActivate\n```\n\nTop right in n8n.\n\n---\n\n# STEP 6 — Test it\n\nSend to your Telegram bot:\n\n```\nPhoto + caption\n```\n\nExample caption:\n\n```\nFocus on craftsmanship and premium luxury feel\n```\n\n---\n\n# WHAT WILL HAPPEN (automatic)\n\n1. Telegram receives photo\n2. Image uploaded to Drive\n3. AI analyzes image\n4. AI writes cinematic ad prompt\n5. Kie generates video\n6. Workflow waits\n7. Video sent back to Telegram\n\n---\n\n# STEP 7 — If video never arrives\n\nCheck this node:\n\n**Generate Ad**\n\nMake sure header:\n\n```\nAuthorization: Bearer YOUR_KIE_API_KEY\n```\n\nNOT empty.\n\n---\n\n# STEP 8 — Most common mistake checklist\n\nMake sure ALL 4 are done:\n\n```\n✔ Kie API key added\n✔ OpenAI connected\n✔ Google Drive connected\n✔ Workflow activated\n```\n\n---\n\n# DONE.\n\nSend image → get cinematic ad video automatically.\n\n",
+        "height": 3936,
+        "width": 560,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -816,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "7d2578df-69f7-4fdf-9687-0fe9d956480e",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share file": {
+      "main": [
+        [
+          {
+            "node": "Get Photo Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Commercial Video Director",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Commercial Video Director",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Commercial Video Director": {
+      "main": [
+        [
+          {
+            "node": "Generate Ad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Check Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Send a video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a video": {
+      "main": [
+        [
+          {
+            "node": "Send Video Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Photo Link": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Ad": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Status": {
+      "main": [
+        [
+          {
+            "node": "Check If: Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If: Success": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "778bcc61-1f58-497a-a80a-316b900b1bd6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aa2baa37075818a5ee7b621c13f1d4c31148bd679b57bbe8abaed8ff3b9b7c8a"
+  },
+  "id": "ferlyv7PY7iOni0k",
+  "tags": []
+}
